@@ -1,7 +1,3 @@
-/**
- * <p>Copyright: Copyright (c) 2017</p>
- * <p>Company: bubugao yunhou</p>
- */
 package com.lifu.domain;
 
 import java.io.BufferedReader;
@@ -30,6 +26,8 @@ public class WhoisService {
     	
     	if(domain.contains("www.")){
     		domain = domain.replace("www.", "").trim();
+    	}else if(domain.contains("http://www.")){
+    		domain = domain.replace("http://www.", "").trim();
     	}
         String server = "";  
         String tld = getTLD(domain);  
