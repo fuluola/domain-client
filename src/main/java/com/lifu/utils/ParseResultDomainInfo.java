@@ -18,9 +18,11 @@ public class ParseResultDomainInfo {
 	public static DomainObject parseComDomainInfo(DomainObject obj,String line){
 		
 		if(line.startsWith("Creation Date:")){
-			obj.setCreationDate(line.split(":")[1].trim());
+			if(!StringUtils.isNullOrEmpty(line.split(":")[1]))
+				obj.setCreationDate(line.split(":")[1].trim().substring(0, 10));
 		}else if(line.startsWith("Registrar Registration Expiration Date:")){
-			obj.setExpirationDate(line.split(":")[1].trim());
+			if(!StringUtils.isNullOrEmpty(line.split(":")[1]))
+				obj.setExpirationDate(line.split(":")[1].trim().substring(0, 10));
 		}else if(line.startsWith("Registrar:")){
 			obj.setRegistrar(line.split(":")[1].trim());
 		}else if(line.startsWith("Registrant Name:")){
@@ -43,9 +45,9 @@ public class ParseResultDomainInfo {
 public static DomainObject parseOrgDomainInfo(DomainObject obj,String line){
 		
 		if(line.startsWith("Creation Date:")){
-			obj.setCreationDate(line.split(":")[1].trim());
+			obj.setCreationDate(line.split(":")[1].trim().substring(0, 10));
 		}else if(line.startsWith("Registry Expiry Date:")){
-			obj.setExpirationDate(line.split(":")[1].trim());
+			obj.setExpirationDate(line.split(":")[1].trim().substring(0, 10));
 		}else if(line.startsWith("Registrant Name:")){
 			obj.setRegistrantName(line.split(":")[1].trim());
 		}else if(line.startsWith("Registrant Organization:")){
@@ -66,9 +68,9 @@ public static DomainObject parseOrgDomainInfo(DomainObject obj,String line){
 	public static DomainObject parseCnDomainInfo(DomainObject obj,String line){
 		
 		if(line.startsWith("Registration Time:")){
-			obj.setCreationDate(line.split(":")[1].trim());
+			obj.setCreationDate(line.split(":")[1].trim().substring(0, 10));
 		}else if(line.startsWith("Expiration Time:")){
-			obj.setExpirationDate(line.split(":")[1].trim());
+			obj.setExpirationDate(line.split(":")[1].trim().substring(0, 10));
 		}else if(line.startsWith("Registrant:")){
 			obj.setRegistrantName(line.split(":")[1].trim());
 		}else if(line.startsWith("Sponsoring Registrar:")){

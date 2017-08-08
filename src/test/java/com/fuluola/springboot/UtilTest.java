@@ -26,7 +26,7 @@ public class UtilTest {
 //    	String domain = "baidu.com".replace("www.", "");
 //    	HtmlHead hh = WebUtil.getHtmlHead("http://www.mi.com");
 //		System.out.println(hh.getTitle());
-		System.out.println(WebUtil.get("http://www.cnhnb.com",""));
+		System.out.println("1995-04-11T04".length());
     	
     	
 	}
