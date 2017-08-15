@@ -9,18 +9,22 @@ import java.net.Socket;
 import java.net.SocketAddress;
 import java.net.UnknownHostException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.lifu.model.Constants;
 import com.lifu.model.DomainObject;
 import com.lifu.model.QueryDomainRespMessage;
+import com.lifu.springboot.ScheduledTasks;
 import com.lifu.utils.ParseResultDomainInfo;
 
 @Service
 public class WhoisService {  
 
     private static final int DEFAULT_PORT = 43;  
-    static String[] urls = new String[]{"=baidu.com","ele.me","csdn.net"};
+   // static String[] urls = new String[]{"=baidu.com","ele.me","csdn.net"};
+    private static Logger logger = LoggerFactory.getLogger(WhoisService.class);
       //grs-whois.hichina.com whois.paycenter.com.cn whois.markmonitor.com whois.verisign-grs.com
     public QueryDomainRespMessage query(String domain)  {  
     	

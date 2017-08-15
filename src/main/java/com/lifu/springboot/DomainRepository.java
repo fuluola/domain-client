@@ -32,7 +32,7 @@ public class DomainRepository {
 	private static Logger logger = LoggerFactory.getLogger(DomainRepository.class);
 	private static String insertSQL = "insert into domain (domain,status,errorCount,createTime) values(?,0,0,now())"; 
 	private static String findSQL = "select domain,status,createTime,errorCount from domain where domain=?";
-	private static String processSQL = "select domain,status,errorCount,createTime from domain where status=0 and errorCount<3 order by createTime asc limit 200";
+	private static String processSQL = "select domain,status,errorCount,createTime from domain where status=0 and errorCount<3 order by createTime asc limit 100";
 	private static String updateSUCCESS_SQL = "update domain set status=1,errorMsg=null,updateTime=now() where domain=?";
 	private static String updateERROR_SQL = "update domain set errorMsg=?,errorCount=errorCount+1,updateTime=now() where domain=?";
 	
@@ -90,11 +90,11 @@ public class DomainRepository {
 	
 	public String processBatchDomain(){
 		List<Map<String,Object>> list= queryProcessDomain();
-		logger.info("本次共处理"+list.size()+"条记录!");
+		logger.info("total process "+list.size()+" records!");
 		if(list.size()>=1){
 			for(Map<String,Object> map:list){
 				String domain = (String) map.get("domain");
-				logger.info("开始采集信息，域名："+domain);
+				logger.info("start collecting,domain:"+domain);
 				processSingleDomain(domain);
 			}
 		}

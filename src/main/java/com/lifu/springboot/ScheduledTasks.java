@@ -24,12 +24,12 @@ public class ScheduledTasks{
 	private static Logger logger = LoggerFactory.getLogger(ScheduledTasks.class);
 	@Autowired
 	private DomainRepository domainRepo;
-	//30秒执行一次
+	//10分钟执行一次
     @Scheduled(fixedRate = 1000 * 60*10)
     public void reportCurrentTime(){
-    	logger.info("开始批量域名信息采集");
+    	logger.info("batch domain collecting begin...");
     	domainRepo.processBatchDomain();
-    	logger.info("批量域名信息采集结束");
+    	logger.info("batch domain collecting over...");
     }
 
     //每1分钟执行一次
