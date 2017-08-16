@@ -87,4 +87,24 @@ public static DomainObject parseOrgDomainInfo(DomainObject obj,String line){
 		}
 		return obj;
 	}
+	/**
+	 * @date 2017年8月16日下午4:11:48
+	 * @author fuzhuan
+	 * @param obj
+	 * @param line
+	 * 
+	 */
+	public static DomainObject parseTWDomainInfo(DomainObject obj, String line) {
+		if(line.startsWith("Record created on")){
+			obj.setCreationDate(line.replace("(YYYY-MM-DD)", "").replace("Record created on", "").trim());
+		}else if(line.startsWith("Record expires on")){
+			obj.setExpirationDate(line.replace("(YYYY-MM-DD)", "").replace("Record expires on", "").trim());
+		}else if(line.startsWith("Registration Service Provider:")){
+			obj.setRegistrar(line.split(":")[1].trim());
+		}else if(line.startsWith("TEL:")){
+			obj.setRegistrantPhone(line.split(":")[1].trim());
+		}
+		return obj;
+		
+	}
 }
