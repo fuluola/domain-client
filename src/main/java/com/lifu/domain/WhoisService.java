@@ -8,6 +8,8 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketAddress;
 import java.net.UnknownHostException;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,22 +18,25 @@ import org.springframework.stereotype.Service;
 import com.lifu.model.Constants;
 import com.lifu.model.DomainObject;
 import com.lifu.model.QueryDomainRespMessage;
-import com.lifu.springboot.ScheduledTasks;
+import com.lifu.utils.DomainTools;
 import com.lifu.utils.ParseResultDomainInfo;
 
 @Service
 public class WhoisService {  
 
     private static final int DEFAULT_PORT = 43;  
-   // static String[] urls = new String[]{"=baidu.com","ele.me","csdn.net"};
-    private static Logger logger = LoggerFactory.getLogger(WhoisService.class);
-      //grs-whois.hichina.com whois.paycenter.com.cn whois.markmonitor.com whois.verisign-grs.com
+
+   // private static Logger logger = LoggerFactory.getLogger(WhoisService.class);
+
     public QueryDomainRespMessage query(String domain)  {  
     	
     	if(domain.contains("www.")){
     		domain = domain.replace("www.", "").trim();
     	}else if(domain.contains("http://www.")){
     		domain = domain.replace("http://www.", "").trim();
+    	}
+    	if(DomainTools.isTwoLevelDomain(domain)){
+    		domain = domain.substring(domain.indexOf(".")+1);
     	}
         String server = "";  
         String tld = getTLD(domain);  
@@ -47,18 +52,16 @@ public class WhoisService {
         } else if ("cn".equals(tld)) {  
             server = "whois.cnnic.cn";  
             return queryCnWhoisServer(domain, server);  
-        } else if ("jp".equals(tld)) {  
-            server = "whois.jprs.jp";  
-        } else if ("tw".equals(tld)) {  
-            server = "whois.twnic.tw";  
-        }else if("io".equals(tld)){
-        	server = "whois.nic.io";
-        }else if("me".equals(tld)){
-        	server = "whois.nic.me";
-        }else if("hk".equals(tld)){
-        	server = "whois.hkirc.hk";
+        }  else if ("tw".equals(tld)) {  
+            server = "whois.twnic.net.tw";  
+            return queryTWWhoisServer(domain, server);
+        }else{
+        	QueryDomainRespMessage respMsg = new QueryDomainRespMessage();
+        	respMsg.setCode(Constants.FAIL);
+        	respMsg.setExceptionMsg("不支持的域名类型"+tld);
+        	return respMsg;
         }
-        return  null;
+      
     }  
     private QueryDomainRespMessage queryOrgWhoisServer(String domain,
 			String server) {
@@ -84,6 +87,73 @@ public class WhoisService {
          	respMsg.setCode(Constants.SUCCESS);
          	respMsg.setDomainObject(obj);
          	respMsg.setSuccResultStr(ret.toString());
+ 		} catch (IOException e) {
+ 			respMsg.setCode(Constants.FAIL);
+ 			respMsg.setExceptionMsg(e.getMessage());
+ 			e.printStackTrace();
+ 		}finally{
+ 		   	out.close();
+         	try {
+ 				socket.close();
+ 			} catch (IOException e) {
+ 				e.printStackTrace();
+ 			}
+ 		}
+         return respMsg;  
+	}
+    /**
+     * 查询台湾域名whois信息
+     * @date 2017年8月16日下午4:06:33
+     * @author fuzhuan
+     * @param domain
+     * @param server
+     * @return
+     *
+     */
+    private QueryDomainRespMessage queryTWWhoisServer(String domain,String server) {
+			
+    	 Socket socket = new Socket();  
+         SocketAddress  remoteAddr=new InetSocketAddress(server, DEFAULT_PORT);
+         PrintWriter out = null;
+         String line="";  
+         DomainObject obj = null;
+         QueryDomainRespMessage respMsg = new QueryDomainRespMessage();
+     	 
+         try {
+ 			socket.connect(remoteAddr, 15*1000);
+ 			socket.setSoTimeout(20 * 1000);  
+         	out = new PrintWriter(socket.getOutputStream());  
+         	out.println(domain);  
+         	out.flush(); 
+         	BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));  
+         	obj = new DomainObject();
+         	obj.setDomainName(domain);
+         	int point=0;
+         	Map<String,String> valueMap = new HashMap<String,String>();
+         	while((line=in.readLine())!=null){
+         		line = line.trim();
+         		++point;
+         		if(point==3){
+         			valueMap.put("registrant", line);
+         		}else if(point==8){
+         			valueMap.put("registrantName",line.split("   ")[0]);
+         			valueMap.put("email", line.split("   ")[1]);
+         		}else if(point==16){
+         			valueMap.put("dns", line);
+         		}else if(point==17){
+         			valueMap.put("ns", line);
+         		}
+         		//ret.append(line + lineSeparator);  
+         		ParseResultDomainInfo.parseTWDomainInfo(obj, line);
+         	}
+         	obj.setRegistrantName(valueMap.get("registrantName"));
+         	obj.setRegistrantEmail(valueMap.get("email"));
+         	obj.setRegistrantOrganization(valueMap.get("registrant"));
+         	obj.setDnsServer(valueMap.get("dns"));
+         	obj.setNsServer(valueMap.get("ns"));
+         	respMsg.setCode(Constants.SUCCESS);
+         	respMsg.setDomainObject(obj);
+
  		} catch (IOException e) {
  			respMsg.setCode(Constants.FAIL);
  			respMsg.setExceptionMsg(e.getMessage());
@@ -256,7 +326,7 @@ public class WhoisService {
     	StringBuffer ret = new StringBuffer();
     	BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));  
     	while((line=in.readLine())!=null){
-    		ret.append(line + lineSeparator);  
+    		ret.append(line.trim() + lineSeparator);  
     	}
     	out.close();
     	socket.close();
@@ -274,8 +344,8 @@ public class WhoisService {
       //  System.out.println(w.query("spring.io")); 
         long start=System.currentTimeMillis();
         //QueryDomainRespMessage
-        String msg = w.queryWhoisServer("163.com", "whois.verisign-grs.com");
-     //   QueryDomainRespMessage msg = w.query("taobao.com");
+     //   String msg = w.queryWhoisServer("abc.com.tw", "whois.twnic.net.tw");
+        QueryDomainRespMessage msg = w.query("pchome.com.tw");
         System.out.println("用时: "+(System.currentTimeMillis()-start));
         System.out.println(msg);
     }  

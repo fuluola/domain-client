@@ -5,9 +5,8 @@
 package com.fuluola.springboot;
 
 import java.io.IOException;
-
-import com.lifu.model.HtmlHead;
-import com.lifu.utils.WebUtil;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * @author fuluola
@@ -26,8 +25,13 @@ public class UtilTest {
 //    	String domain = "baidu.com".replace("www.", "");
 //    	HtmlHead hh = WebUtil.getHtmlHead("http://www.mi.com");
 //		System.out.println(hh.getTitle());
-		System.out.println("1995-04-11T04".length());
-    	
-    	
+    	String str="qq--ww900.mld.cn";
+    	String regEx = "(\\S+\\.){2}(com|net|org|cn|tw)";
+    	String regEx2 = "(\\S+)(.com|.net|.org|.cn|.tw){2}"; 
+    	Pattern pattern = Pattern.compile(regEx2, Pattern.CASE_INSENSITIVE);
+    	Matcher matcher = pattern.matcher(str);
+    	    // 字符串是否与正则表达式相匹配
+	    boolean rs = matcher.matches();
+	    System.out.println(rs);
 	}
 }
