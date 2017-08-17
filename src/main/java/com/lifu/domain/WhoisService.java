@@ -25,9 +25,10 @@ import com.lifu.utils.ParseResultDomainInfo;
 public class WhoisService {  
 
     private static final int DEFAULT_PORT = 43;  
-
    // private static Logger logger = LoggerFactory.getLogger(WhoisService.class);
 
+    private static Logger logger = LoggerFactory.getLogger(WhoisService.class);
+      //grs-whois.hichina.com whois.paycenter.com.cn whois.markmonitor.com whois.verisign-grs.com
     public QueryDomainRespMessage query(String domain)  {  
     	
     	if(domain.contains("www.")){

@@ -29,6 +29,7 @@ public class UtilTest {
     	String regEx = "(\\S+\\.){2}(com|net|org|cn|tw)";
     	String regEx2 = "(\\S+)(.com|.net|.org|.cn|.tw){2}"; 
     	Pattern pattern = Pattern.compile(regEx2, Pattern.CASE_INSENSITIVE);
+
     	Matcher matcher = pattern.matcher(str);
     	    // 字符串是否与正则表达式相匹配
 	    boolean rs = matcher.matches();
