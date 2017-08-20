@@ -130,18 +130,30 @@ public class WhoisService {
          	obj = new DomainObject();
          	obj.setDomainName(domain);
          	int point=0;
+         	int pointRegistrant = 0;
+         	int pointDNS = 0;
+         	int pointEmail = 0;
          	Map<String,String> valueMap = new HashMap<String,String>();
          	while((line=in.readLine())!=null){
          		line = line.trim();
          		++point;
-         		if(point==3){
+         		if("Registrant:".equals(line)){
+         			pointRegistrant=point;
+         		}
+         		if(line.startsWith("Domain servers in listed order:")){
+         			pointDNS=point;
+         		}
+         		if(line.contains("Contact:")){
+         			pointEmail=point;
+         		}
+         		if(pointRegistrant+1==point){
          			valueMap.put("registrant", line);
-         		}else if(point==8){
+         		}else if(pointEmail+1==point){
          			valueMap.put("registrantName",line.split("   ")[0]);
          			valueMap.put("email", line.split("   ")[1]);
-         		}else if(point==16){
+         		}else if(pointDNS+1==point){
          			valueMap.put("dns", line);
-         		}else if(point==17){
+         		}else if(pointDNS+2==point){
          			valueMap.put("ns", line);
          		}
          		//ret.append(line + lineSeparator);  
@@ -344,10 +356,9 @@ public class WhoisService {
     	WhoisService w = new WhoisService();  
       //  System.out.println(w.query("spring.io")); 
         long start=System.currentTimeMillis();
-        //QueryDomainRespMessage
-     //   String msg = w.queryWhoisServer("abc.com.tw", "whois.twnic.net.tw");
-        QueryDomainRespMessage msg = w.query("pchome.com.tw");
-        System.out.println("用时: "+(System.currentTimeMillis()-start));
+        //QueryDomainRespMessage  grs-whois.hichina.com
+        String msg = w.queryWhoisServer("yaoze168.com", "whois.verisign-grs.com");
+       // QueryDomainRespMessage msg = w.query("yaoze168.com");
         System.out.println(msg);
     }  
       

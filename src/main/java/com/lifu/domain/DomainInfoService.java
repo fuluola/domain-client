@@ -46,18 +46,18 @@ public class DomainInfoService {
 			
 		}
 		if(respMessage.getCode()==null || respMessage.getDomainObject()==null){
-			logger.info(domain+": can not find whois info!!");
+			logger.info(domain+":can not find whois info!!");
 			return null;
 		}
 		DomainObject domainInfo = respMessage.getDomainObject();
 		domainInfo.setDomainName(domain);
-		logger.info("start collecting ip address info,domain："+domain);
+		logger.info("start collecting ip address info,domain:"+domain);
 		String ip = nslookUp.lookUpIP(domain);
 		if(ip!=null){
 			String address = nslookUp.getAddressCityByIp("ip="+ip);
 			domainInfo.setIpAddress(address);
 		}
-		logger.info("start collecting website info,domain："+domain);
+		logger.info("start collecting website info,domain:"+domain);
 		HtmlHead hh = WebUtil.getHtmlHead(domain);
 		if(hh!=null){
 			domainInfo.setTitle(hh.getTitle());
@@ -65,7 +65,7 @@ public class DomainInfoService {
 			domainInfo.setDescription(hh.getDescription());
 		}
 		domainInfo.setIp(ip);
-		logger.info("start collecting googlePR,domain："+domain);
+		logger.info("start collecting googlePR,domain:"+domain);
 		domainInfo.setGooglePR(getGooglePR(domain));
 		return respMessage;
 		
