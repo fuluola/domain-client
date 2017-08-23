@@ -1,5 +1,6 @@
 package com.lifu.domain;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -73,11 +74,15 @@ public class DomainInfoService {
 	
 	public String getGooglePR(String domain)  {
 		Runtime rt = Runtime.getRuntime();
-		Process p;
+		Process process;
 		try {
 			String command = "phantomjs.exe "+phantomRoot+"phantomjs-2.1.1-windows\\netsniff2.js ";
-			p = rt.exec(command+PR_URL+domain);
-			InputStream is = p.getInputStream();
+			process = rt.exec(command+PR_URL+domain);
+		    /*为"错误输出流"单独开一个线程读取之,否则会造成标准输出流的阻塞*/  
+            Thread t=new Thread(new InputStreamRunnable(process.getErrorStream(),domain));  
+            t.start();  
+
+			InputStream is = process.getInputStream();
 			BufferedReader br = new BufferedReader(new InputStreamReader(is));
 			String line=null;
 			String result = "";
@@ -97,4 +102,37 @@ public class DomainInfoService {
 		
 		return "";
 	}
+	
+	/**读取InputStream的线程*/  
+	class InputStreamRunnable implements Runnable  { 
+	 
+	    BufferedReader bReader=null;  
+	    String type=null;  
+	    public InputStreamRunnable(InputStream is, String domain)  
+	    {  
+	        try  
+	        {  
+	            bReader=new BufferedReader(new InputStreamReader(new BufferedInputStream(is),"UTF-8"));  
+	            type=domain;  
+	        }  
+	        catch(Exception ex)  
+	        {  
+	        }  
+	    }  
+	    public void run()  
+	    {  
+	        String line;  
+	        try  
+	        {  
+	            while((line=bReader.readLine())!=null)  
+	            {  
+	                logger.info(type+":get pr error:"+line);
+	            }  
+	            bReader.close();  
+	        }  
+	        catch(Exception ex)  
+	        {  
+	        }  
+	    }  
+	}  
 }

@@ -25,7 +25,7 @@ public class ScheduledTasks{
 	@Autowired
 	private DomainRepository domainRepo;
 	//10分钟执行一次
-    @Scheduled(fixedRate = 1000 * 60*10)
+    @Scheduled(fixedRate = 1000 * 60*15)
     public void reportCurrentTime(){
     	logger.info("batch domain collecting begin...");
     	domainRepo.processBatchDomain();

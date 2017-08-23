@@ -136,6 +136,11 @@ public class WhoisService {
          	Map<String,String> valueMap = new HashMap<String,String>();
          	while((line=in.readLine())!=null){
          		line = line.trim();
+         		if("No Found".equals(line)){
+         			respMsg.setCode(Constants.FAIL);
+         			respMsg.setExceptionMsg("Not Found");
+         			return respMsg;
+         		}
          		++point;
          		if("Registrant:".equals(line)){
          			pointRegistrant=point;
@@ -148,15 +153,28 @@ public class WhoisService {
          		}
          		if(pointRegistrant+1==point){
          			valueMap.put("registrant", line);
-         		}else if(pointEmail+1==point){
-         			valueMap.put("registrantName",line.split("   ")[0]);
-         			valueMap.put("email", line.split("   ")[1]);
+         		}else if(pointEmail+1==point && line.contains("@")){
+         			String[] arr = line.split("\\s{2,3}");
+         			if(arr.length==2){
+         				valueMap.put("registrantName",arr[0]);
+         				valueMap.put("email", arr[1]);
+         			}else if(arr.length==1){
+         				valueMap.put("email", arr[0]);
+         			}
+         			
+         		}if(pointEmail+2==point && line.contains("@")){
+         			String[] arr = line.split("\\s{2,3}");
+          			if(arr.length==2){
+         				valueMap.put("registrantName",arr[0]);
+         				valueMap.put("email", arr[1]);
+         			}else if(arr.length==1){
+         				valueMap.put("email", arr[0]);
+         			}
          		}else if(pointDNS+1==point){
          			valueMap.put("dns", line);
          		}else if(pointDNS+2==point){
          			valueMap.put("ns", line);
          		}
-         		//ret.append(line + lineSeparator);  
          		ParseResultDomainInfo.parseTWDomainInfo(obj, line);
          	}
          	obj.setRegistrantName(valueMap.get("registrantName"));
@@ -172,9 +190,14 @@ public class WhoisService {
  			respMsg.setExceptionMsg(e.getMessage());
  			e.printStackTrace();
  		}finally{
- 		   	out.close();
+ 		   	
          	try {
- 				socket.close();
+         		if(out!=null){
+         			out.close();
+         		}
+         		if(socket!=null){
+         			socket.close();
+         		}
  			} catch (IOException e) {
  				e.printStackTrace();
  			}
@@ -354,11 +377,11 @@ public class WhoisService {
       
     public static void main(String[] args) throws Exception {  
     	WhoisService w = new WhoisService();  
-      //  System.out.println(w.query("spring.io")); 
+      //  System.out.println(w.query("spring.io")); maxitelecom.com.tw
         long start=System.currentTimeMillis();
         //QueryDomainRespMessage  grs-whois.hichina.com
-        String msg = w.queryWhoisServer("yaoze168.com", "whois.verisign-grs.com");
-       // QueryDomainRespMessage msg = w.query("yaoze168.com");
+//        String msg = w.queryWhoisServer("jpexpress.com.tw", "whois.twnic.net.tw");
+        QueryDomainRespMessage msg = w.query("jpexpress.com.tw");
         System.out.println(msg);
     }  
       

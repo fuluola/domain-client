@@ -12,7 +12,10 @@ import java.util.regex.Pattern;
  *
  */
 public class DomainTools {
-
+	//二级域名，\S代表任意非空字符
+	private static final String secondDomain = "(\\S+\\.){2}(com|net|org|cn|tw)";
+	//一级域名
+	private static final String firstDomain = "(\\S+)(.com|.net|.org|.cn|.tw){2}"; 
 	/**
 	 * 判断一个域名是否是二级域名 ，如 mail.qq.com是,pchome.com.cn不是
 	 * @date 2017年8月16日下午10:54:15
@@ -22,8 +25,8 @@ public class DomainTools {
 	 *
 	 */
 	public static boolean isTwoLevelDomain(String domain) {
-	  	String secondDomain = "(\\S+\\.){2}(com|net|org|cn|tw)";
-    	String firstDomain = "(\\S+)(.com|.net|.org|.cn|.tw){2}"; 
+	  	
+    	
     	Pattern secondptn = Pattern.compile(secondDomain, Pattern.CASE_INSENSITIVE);
     	Pattern firstptn = Pattern.compile(firstDomain, Pattern.CASE_INSENSITIVE);
     	Matcher secondmatcher = secondptn.matcher(domain);

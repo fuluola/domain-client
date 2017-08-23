@@ -33,6 +33,9 @@ public class UtilTest {
     	Matcher matcher = pattern.matcher(str);
     	    // 字符串是否与正则表达式相匹配
 	    boolean rs = matcher.matches();
-	    System.out.println(rs);
+	    String line="alenchen@ms5.hinet.net";
+	    String[] arr = line.split("\\s{2,3}");
+	    System.out.println(arr.length);
+	    System.out.println("ns1.taiwandns.net       58.86.60.1 0000:0000:0000:0000:0000:ffff:3a56:3c1".length());
 	}
 }
