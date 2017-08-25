@@ -1,7 +1,3 @@
-/**
- * <p>Copyright: Copyright (c) 2017</p>
- * <p>Company: bubugao yunhou</p>
- */
 package com.lifu.springboot;
 
 import org.slf4j.Logger;

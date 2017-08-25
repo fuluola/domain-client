@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.lifu.utils.DomainTools;
+
 /**
  * @author fuluola
  *
@@ -29,12 +31,6 @@ public class ContactController {
 	@Autowired
 	private DomainRepository domainRepo;
     
-//	@RequestMapping(method=RequestMethod.GET)
-//	public String home(Map<String,Object> model){
-//		List<Contact> contacts = contactRepo.findAll();
-//		model.put("contacts", contacts);
-//		return "home";
-//	}
 
 	@RequestMapping(value="importInit",method=RequestMethod.GET)
 	public String domainImport(Map<String,Object> model){
@@ -52,28 +48,20 @@ public class ContactController {
         if(!"txt".equals(suffix)){
         	resultStr="请导入文本格式文件";
         }else{
+        	
+        	String batch = DomainTools.generateBatch();
         	BufferedReader in = new BufferedReader(new InputStreamReader( file.getInputStream(),"utf-8"));
           	while((line=in.readLine())!=null){
-          		int succRow = domainRepo.insertDomain(line);
+          		int succRow = domainRepo.insertDomain(line,batch);
           		totalRow+=succRow;
           		if(succRow==1){
-          			logger.info(line+" 成功插入数据库!");
+          			logger.info(line+" insert into database SUCCESS!");
           		}
          	}
+          	in.close();
           	resultStr="成功导入"+totalRow+"个域名!";
         }
 		return resultStr;
 	}
-//	
-//	@RequestMapping(value="domainResult",method=RequestMethod.GET)
-//	public Object domainResult(Map<String,Object> model){
-//		return "pageDomainInfo";
-//	}
-//	
-//	@ResponseBody
-//	@RequestMapping(value="domainList",method=RequestMethod.POST)
-//	public Object domainList(Map<String,Object> model){
-//		List<Map<String,Object>> resultMap = domainRepo.pageQueryDomainInfo(null);
-//		return resultMap;
-//	}
+
 }

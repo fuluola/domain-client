@@ -4,6 +4,8 @@
  */
 package com.lifu.utils;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -37,10 +39,14 @@ public class DomainTools {
     	return false;
 	}
 	
+	public static String generateBatch(){
+		SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHH0000");
+		
+		return format.format(new Date());
+	}
 	public static void main(String[] args) {
 		
 		System.out.println(isTwoLevelDomain("mail.com.tw"));
-		String str = "qq.r333344vv.cn";
-		System.out.println(str.substring(str.indexOf(".")+1));
+		System.out.println(generateBatch());
 	}
 }

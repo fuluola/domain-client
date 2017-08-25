@@ -380,8 +380,8 @@ public class WhoisService {
       //  System.out.println(w.query("spring.io")); maxitelecom.com.tw
         long start=System.currentTimeMillis();
         //QueryDomainRespMessage  grs-whois.hichina.com
-//        String msg = w.queryWhoisServer("jpexpress.com.tw", "whois.twnic.net.tw");
-        QueryDomainRespMessage msg = w.query("jpexpress.com.tw");
+//        String msg = w.queryWhoisServer("tpkfoundation.com", "whois.verisign-grs.com");
+        QueryDomainRespMessage msg = w.query("tpkfoundation.com");
         System.out.println(msg);
     }  
       

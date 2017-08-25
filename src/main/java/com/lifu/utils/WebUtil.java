@@ -4,12 +4,15 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
 
 import com.lifu.model.HtmlHead;
@@ -21,6 +24,7 @@ import com.lifu.model.HtmlHead;
  */
 public class WebUtil {
 
+	private static final Logger logger = LoggerFactory.getLogger(WebUtil.class);
 	public static final String CONTENT_TYPE_JSON = "application/json;charset=utf-8";
 	public static final String CONTENT_TYPE_XML = "application/xml;charset=utf-8";
 	public static final String CONTENT_TYPE_FORM = "application/x-www-form-urlencoded;charset=utf-8";
@@ -37,7 +41,7 @@ public class WebUtil {
         //打开连接
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         conn.setConnectTimeout(30 * 1000);
-        conn.setReadTimeout(20 * 1000);
+        conn.setReadTimeout(15 * 1000);
         conn.setUseCaches(false);    
         StringBuffer buffer = new StringBuffer();
         BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream(),"UTF-8"));
@@ -53,24 +57,48 @@ public class WebUtil {
 	public static HtmlHead getHtmlHead(String path)  {
 		
 		if(!path.contains("http://") && !path.contains("https://")){
-			path = "http://"+path.trim();
+			if(!path.contains("www.")){
+				path = "www."+path.trim();
+			}
+			path = "http://"+path;
 		}
     	Connection.Response response=null;
 		try {
 			//document = Jsoup.parse(new URL(path).openStream(),"utf-8",path);
-			response = Jsoup.connect(path).timeout(15*1000).execute();
+			response = Jsoup.connect(path).timeout(10*1000).execute();
 		} catch (IOException e) {
 			e.printStackTrace();
 			return null;
 		}
 		//<meta http-equiv="Content-Type" content="text/html; charset=gb2312" />
     	String body = response.body();
-    	Document document = Jsoup.parse(body);
+    	System.out.println(body);
+    	Document document = null;
+    	try {
+    		 document = Jsoup.parse(body);
+		} catch (IllegalArgumentException e) {
+			logger.info("can not parse this website!!!");
+			return null;
+		}
+    	
     	String title="",keywords="",description="";
-    //	String contentType =  document.head().select("meta[http-equiv=Content-Type]").attr("content");
+    	String charset=response.charset();
 		title = document.head().select("title").text();
 		keywords = document.head().select("meta[name=keywords]").attr("content");
 		description = document.head().select("meta[name=description]").attr("content");
+		Boolean notutf8 = charset!=null&&charset.length()!=0 && !charset.toUpperCase().equals("UTF-8");
+		if(notutf8 ){
+			try {
+				byte[] desc_bytes = new String(description.getBytes(),charset).getBytes();
+				byte[] keyw_bytes = new String(keywords.getBytes(),charset).getBytes();
+				byte[] title_bytes = new String(title.getBytes(),charset).getBytes();
+				description = new String(desc_bytes,"utf-8");
+				keywords = new String(keyw_bytes,"utf-8");
+				title = new String(title_bytes,"utf-8");
+			} catch (UnsupportedEncodingException e) {
+				e.printStackTrace();
+			}
+		}
 
     	HtmlHead hh=new HtmlHead();
     	hh.setKeywords(keywords);

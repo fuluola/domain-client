@@ -45,45 +45,62 @@ public class ParseResultDomainInfo {
 public static DomainObject parseOrgDomainInfo(DomainObject obj,String line){
 		
 		if(line.startsWith("Creation Date:")){
-			obj.setCreationDate(line.split(":")[1].trim().substring(0, 10));
+			if(line.split(":").length>1)
+				obj.setCreationDate(line.split(":")[1].trim().substring(0, 10));
 		}else if(line.startsWith("Registry Expiry Date:")){
-			obj.setExpirationDate(line.split(":")[1].trim().substring(0, 10));
+			if(line.split(":").length>1)
+				obj.setExpirationDate(line.split(":")[1].trim().substring(0, 10));
 		}else if(line.startsWith("Registrant Name:")){
-			obj.setRegistrantName(line.split(":")[1].trim());
+			if(line.split(":").length>1)
+				obj.setRegistrantName(line.split(":")[1].trim());
 		}else if(line.startsWith("Registrant Organization:")){
-			String ro = line.split(":")[1];
-			obj.setRegistrantOrganization((StringUtils.isEmptyOrWhitespaceOnly(ro)?"":ro).trim());
+			
+			if(line.split(":").length>1){
+				String ro = line.split(":")[1];
+				obj.setRegistrantOrganization(ro.trim());
+			}
 		}else if(line.startsWith("Registrant Phone:")){
 			String rp = line.split(":")[1];
 			obj.setRegistrantPhone((StringUtils.isEmptyOrWhitespaceOnly(rp)?"":rp).trim());
 		}else if(line.startsWith("Registrant Email:")){
 			obj.setRegistrantEmail(line.split(":")[1].trim());
 		}else if(line.startsWith("Name Server") && StringUtils.isNullOrEmpty(obj.getNsServer())){
-			obj.setNsServer(line.split(":")[1]);
+			if(line.split(":").length>1)
+				obj.setNsServer(line.split(":")[1]);
 		}else if(line.startsWith("Name Server") && !StringUtils.isNullOrEmpty(obj.getNsServer()) && StringUtils.isNullOrEmpty(obj.getDnsServer())){
-			obj.setDnsServer(line.split(":")[1]);
+			if(line.split(":").length>1)
+				obj.setDnsServer(line.split(":")[1]);
 		}
 		return obj;
 	}
 	public static DomainObject parseCnDomainInfo(DomainObject obj,String line){
 		
 		if(line.startsWith("Registration Time:")){
-			obj.setCreationDate(line.split(":")[1].trim().substring(0, 10));
+			if(line.split(":").length>1)
+				obj.setCreationDate(line.split(":")[1].trim().substring(0, 10));
 		}else if(line.startsWith("Expiration Time:")){
-			obj.setExpirationDate(line.split(":")[1].trim().substring(0, 10));
+			if(line.split(":").length>1)
+				obj.setExpirationDate(line.split(":")[1].trim().substring(0, 10));
 		}else if(line.startsWith("Registrant:")){
-			obj.setRegistrantName(line.split(":")[1].trim());
+			if(line.split(":").length>1)
+				obj.setRegistrantName(line.split(":")[1].trim());
 		}else if(line.startsWith("Sponsoring Registrar:")){
-			obj.setRegistrar(line.split(":")[1].trim());
+			if(line.split(":").length>1)
+				obj.setRegistrar(line.split(":")[1].trim());
 		}else if(line.startsWith("Registrant:")){
-			String ro = line.split(":")[1];
-			obj.setRegistrantOrganization((StringUtils.isEmptyOrWhitespaceOnly(ro)?"":ro).trim());
+			if(line.split(":").length>1){
+				String ro = line.split(":")[1];
+				obj.setRegistrantOrganization((StringUtils.isEmptyOrWhitespaceOnly(ro)?"":ro).trim());
+			}
 		}else if(line.startsWith("Registrant Contact Email:")){
-			obj.setRegistrantEmail(line.split(":")[1].trim());
+			if(line.split(":").length>1)
+				obj.setRegistrantEmail(line.split(":")[1].trim());
 		}else if(line.startsWith("Name Server") && StringUtils.isNullOrEmpty(obj.getNsServer())){
-			obj.setNsServer(line.split(":")[1]);
+			if(line.split(":").length>1)
+				obj.setNsServer(line.split(":")[1]);
 		}else if(line.startsWith("Name Server") && !StringUtils.isNullOrEmpty(obj.getNsServer()) && StringUtils.isNullOrEmpty(obj.getDnsServer())){
-			obj.setDnsServer(line.split(":")[1]);
+			if(line.split(":").length>1)
+				obj.setDnsServer(line.split(":")[1]);
 		}
 		return obj;
 	}

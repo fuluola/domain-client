@@ -28,15 +28,18 @@ public class DomainInfoService {
 
 	private static Logger logger = LoggerFactory.getLogger(DomainInfoService.class);
 	
-	private String PR_URL = "http://pr.chinaz.com/";
+	private String[] PR_URL = {"http://pr.chinaz.com/","http://pr.aizhan.com/"};
 	@Value("${phantom.path}")
 	private String phantomRoot;
-	
+	@Value("${getPR}")
+	private Boolean getPR;
 	@Autowired
 	private NsLookup nslookUp;
 	
 	@Autowired
 	private WhoisService whois;
+	
+	private int point = 0;
 	
 	public QueryDomainRespMessage domainInfoQuery(String domain) {
 		logger.info("start collecting whois info,domain:"+domain);
@@ -54,6 +57,7 @@ public class DomainInfoService {
 		domainInfo.setDomainName(domain);
 		logger.info("start collecting ip address info,domain:"+domain);
 		String ip = nslookUp.lookUpIP(domain);
+		domainInfo.setIp(ip);
 		if(ip!=null){
 			String address = nslookUp.getAddressCityByIp("ip="+ip);
 			domainInfo.setIpAddress(address);
@@ -65,9 +69,11 @@ public class DomainInfoService {
 			domainInfo.setKeywords(hh.getKeywords());
 			domainInfo.setDescription(hh.getDescription());
 		}
-		domainInfo.setIp(ip);
-		logger.info("start collecting googlePR,domain:"+domain);
-		domainInfo.setGooglePR(getGooglePR(domain));
+		
+		if(getPR){
+			logger.info("start collecting googlePR,domain:"+domain);
+			domainInfo.setGooglePR(getGooglePR(domain));
+		}
 		return respMessage;
 		
 	}
@@ -77,7 +83,11 @@ public class DomainInfoService {
 		Process process;
 		try {
 			String command = "phantomjs.exe "+phantomRoot+"phantomjs-2.1.1-windows\\netsniff2.js ";
-			process = rt.exec(command+PR_URL+domain);
+			if(point==1){
+				command = "phantomjs.exe "+phantomRoot+"phantomjs-2.1.1-windows\\netsniff1.js ";
+			}
+			process = rt.exec(command+PR_URL[point%PR_URL.length]+domain);
+		
 		    /*为"错误输出流"单独开一个线程读取之,否则会造成标准输出流的阻塞*/  
             Thread t=new Thread(new InputStreamRunnable(process.getErrorStream(),domain));  
             t.start();  
@@ -89,6 +99,9 @@ public class DomainInfoService {
 			while((line=br.readLine())!=null){
 				result += line;
 			}
+			process.waitFor();
+			br.close();
+			process.destroy();
 			if(!StringUtils.isNullOrEmpty(result) && result.contains("http")){
 				
 				String pr=result.substring(result.lastIndexOf(".")-1, result.lastIndexOf("."));
@@ -97,6 +110,8 @@ public class DomainInfoService {
 			}
 		
 		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
 		

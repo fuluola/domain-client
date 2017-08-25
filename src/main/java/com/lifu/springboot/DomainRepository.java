@@ -29,22 +29,28 @@ import com.lifu.model.QueryDomainRespMessage;
 @Repository
 public class DomainRepository {
 	
-	private static Logger logger = LoggerFactory.getLogger(DomainRepository.class);
-	private static String insertSQL = "insert into domain (domain,status,errorCount,createTime) values(?,0,0,now())"; 
-	private static String findSQL = "select domain,status,createTime,errorCount from domain where domain=?";
-	private static String processSQL = "select domain,status,errorCount,createTime from domain where status=0 and errorCount<3 order by errorCount asc limit 200";
-	private static String updateSUCCESS_SQL = "update domain set status=1,errorMsg=null,updateTime=now() where domain=?";
-	private static String updateERROR_SQL = "update domain set errorMsg=?,errorCount=errorCount+1,updateTime=now() where domain=?";
-	
-	
-	private static String insertDomainInfoSQL= "INSERT INTO domaininfo_collect (domainName,registrantOrganization,registrar,registrantName,"
-			+ "registrantPhone,registrantEmail,nsServer,dnsServer,creationDate,expirationDate,ip,ipAddress,"
-			+ "title,keywords,description,googlePR,createTime) values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,now())";
 	private JdbcTemplate jdbc;
 	
 	public DomainRepository(JdbcTemplate jdbc){
 		this.jdbc = jdbc;
 	}
+	private static Logger logger = LoggerFactory.getLogger(DomainRepository.class);
+	
+	private static String insertSQL = "insert into domain (domain,status,errorCount,batch,createTime) values(?,0,0,?,now())"; 
+	
+	private static String findSQL = "select domain,status,createTime,errorCount,batch from domain where domain=?";
+	
+	private static String processSQL = "select domain,status,errorCount,createTime,batch from domain where status=0 and errorCount<3 order by errorCount asc limit 300";
+	
+	private static String updateSUCCESS_SQL = "update domain set status=1,errorMsg=null,updateTime=now() where domain=?";
+	
+	private static String updateERROR_SQL = "update domain set errorMsg=?,errorCount=errorCount+1,updateTime=now() where domain=?";
+	
+	private static String insertDomainInfoSQL= "INSERT INTO domaininfo_collect (domainName,registrantOrganization,registrar,registrantName,"
+			+ "registrantPhone,registrantEmail,nsServer,dnsServer,creationDate,expirationDate,ip,ipAddress,"
+			+ "title,keywords,description,googlePR,createTime,batch) values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,now(),?)";
+	
+
 	@Autowired
 	private DomainInfoService infoService;
 	
@@ -54,10 +60,10 @@ public class DomainRepository {
 		
 	}
 	
-	public int insertDomain(String data) {
+	public int insertDomain(String data,String batch) {
 		
 		if(findByDomain(data)==null){
-			return jdbc.update(insertSQL,data);
+			return jdbc.update(insertSQL,data,batch);
 		}else{
 			return 0;
 		}
@@ -70,7 +76,7 @@ public class DomainRepository {
 	}
 	
 	@Transactional
-	public void processSingleDomain(String data){
+	public void processSingleDomain(String data,String batch){
 		QueryDomainRespMessage respMsg=infoService.domainInfoQuery(data);
 		if(respMsg==null) {
 			jdbc.update(updateERROR_SQL, new Object[]{"该域名没有找到注册信息",data});
@@ -82,7 +88,7 @@ public class DomainRepository {
 								domainInfo.getRegistrantPhone(),domainInfo.getRegistrantEmail(),domainInfo.getNsServer(),
 								domainInfo.getDnsServer(),domainInfo.getCreationDate(),domainInfo.getExpirationDate(),
 								domainInfo.getIp(),domainInfo.getIpAddress(),domainInfo.getTitle(),domainInfo.getKeywords(),
-								domainInfo.getDescription(),domainInfo.getGooglePR());
+								domainInfo.getDescription(),domainInfo.getGooglePR(),batch);
 		}else{
 			jdbc.update(updateERROR_SQL, new Object[]{respMsg.getExceptionMsg(),data});
 		}
@@ -94,8 +100,9 @@ public class DomainRepository {
 		if(list.size()>=1){
 			for(Map<String,Object> map:list){
 				String domain = (String) map.get("domain");
+				String batch = (String) map.get("batch");
 				logger.info("start collecting,domain:"+domain);
-				processSingleDomain(domain);
+				processSingleDomain(domain,batch);
 			}
 		}
 		return "";

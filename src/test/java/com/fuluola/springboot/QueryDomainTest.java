@@ -5,12 +5,8 @@
 package com.fuluola.springboot;
 
 import java.io.BufferedReader;
-import java.io.FileInputStream;
+import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.List;
-
-import com.lifu.domain.DomainQueryThread;
 
 /**
  * @author fuluola
@@ -19,18 +15,19 @@ import com.lifu.domain.DomainQueryThread;
 public class QueryDomainTest {
 	
 	public static void main(String[] args) throws Exception {
-		 BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream("E://域名采集项目//22.txt"),"UTF-8"));
-		 String line = "";
-		 List<String> domains = new ArrayList<String>();
-		 while ((line = reader.readLine()) != null) {
-			domains.add(line);
-		 }
-		 reader.close();
-		 for(int i=0;i<domains.size();i++){
-			
-			String domain = domains.get(i).replace("www.", "");
-			new Thread(new DomainQueryThread(domain)).start();
-			Thread.sleep(300);
-		 }
+		Runtime rt = Runtime.getRuntime();
+		String command = "phantomjs.exe D:\\software\\phantomjs-2.1.1-windows\\netsniff1.js ";
+		Process process = rt.exec(command+"http://pr.aizhan.com/baidu.com");
+		InputStream is = process.getInputStream();
+		BufferedReader br = new BufferedReader(new InputStreamReader(is));
+		String line=null;
+		String result = "";
+		while((line=br.readLine())!=null){
+			result += line;
+		}
+		process.waitFor();
+		br.close();
+		process.destroy();
+		System.out.println(result);
 	}
 }
