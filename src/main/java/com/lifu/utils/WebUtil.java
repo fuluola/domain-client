@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
@@ -37,7 +38,7 @@ public class WebUtil {
         //打开连接
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         conn.setConnectTimeout(30 * 1000);
-        conn.setReadTimeout(20 * 1000);
+        conn.setReadTimeout(15 * 1000);
         conn.setUseCaches(false);    
         StringBuffer buffer = new StringBuffer();
         BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream(),"UTF-8"));
@@ -67,11 +68,29 @@ public class WebUtil {
     	String body = response.body();
     	Document document = Jsoup.parse(body);
     	String title="",keywords="",description="";
-    //	String contentType =  document.head().select("meta[http-equiv=Content-Type]").attr("content");
+    	String contentType =  document.head().select("meta[http-equiv=Content-Type]").attr("content");
+    	String charset=null;
 		title = document.head().select("title").text();
 		keywords = document.head().select("meta[name=keywords]").attr("content");
 		description = document.head().select("meta[name=description]").attr("content");
-
+		boolean notUtf8 = contentType!=null && !contentType.contains("utf-8");
+		if(notUtf8){
+			String[] arr=contentType.split("=");
+			if(arr.length==2){
+				charset=arr[1];
+				try {
+					byte[] desc_bytes = new String(description.getBytes(),charset).getBytes();
+					byte[] keyw_bytes = new String(description.getBytes(),charset).getBytes();
+					byte[] title_bytes = new String(description.getBytes(),charset).getBytes();
+					description = new String(desc_bytes,"utf-8");
+					keywords = new String(keyw_bytes,"utf-8");
+					title = new String(title_bytes,"utf-8");
+				} catch (UnsupportedEncodingException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		
     	HtmlHead hh=new HtmlHead();
     	hh.setKeywords(keywords);
     	hh.setTitle(title);

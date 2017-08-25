@@ -31,7 +31,8 @@ public class DomainInfoService {
 	private String PR_URL = "http://pr.chinaz.com/";
 	@Value("${phantom.path}")
 	private String phantomRoot;
-	
+	@Value("${getPR}")
+	private Boolean getPR;
 	@Autowired
 	private NsLookup nslookUp;
 	
@@ -54,6 +55,7 @@ public class DomainInfoService {
 		domainInfo.setDomainName(domain);
 		logger.info("start collecting ip address info,domain:"+domain);
 		String ip = nslookUp.lookUpIP(domain);
+		domainInfo.setIp(ip);
 		if(ip!=null){
 			String address = nslookUp.getAddressCityByIp("ip="+ip);
 			domainInfo.setIpAddress(address);
@@ -65,9 +67,11 @@ public class DomainInfoService {
 			domainInfo.setKeywords(hh.getKeywords());
 			domainInfo.setDescription(hh.getDescription());
 		}
-		domainInfo.setIp(ip);
-		logger.info("start collecting googlePR,domain:"+domain);
-		domainInfo.setGooglePR(getGooglePR(domain));
+		
+		if(getPR){
+			logger.info("start collecting googlePR,domain:"+domain);
+			domainInfo.setGooglePR(getGooglePR(domain));
+		}
 		return respMessage;
 		
 	}
@@ -89,6 +93,9 @@ public class DomainInfoService {
 			while((line=br.readLine())!=null){
 				result += line;
 			}
+			process.waitFor();
+			br.close();
+			process.destroy();
 			if(!StringUtils.isNullOrEmpty(result) && result.contains("http")){
 				
 				String pr=result.substring(result.lastIndexOf(".")-1, result.lastIndexOf("."));
@@ -97,6 +104,8 @@ public class DomainInfoService {
 			}
 		
 		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
 		
