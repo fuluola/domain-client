@@ -99,7 +99,6 @@ public class WebUtil {
 				e.printStackTrace();
 			}
 		}
-
     	HtmlHead hh=new HtmlHead();
     	hh.setKeywords(keywords);
     	hh.setTitle(title);

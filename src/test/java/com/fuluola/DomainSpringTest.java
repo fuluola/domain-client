@@ -41,5 +41,6 @@ public class DomainSpringTest {
 	@Test
 	public void test2(){
 		domainRepo.processSingleDomain("www.hinet.net","");
+
 	}
 }
