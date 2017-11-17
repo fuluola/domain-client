@@ -40,7 +40,7 @@ public class DomainRepository {
 	
 	private static String findSQL = "select domain,status,createTime,errorCount,batch from domain where domain=?";
 	
-	private static String processSQL = "select domain,status,errorCount,createTime,batch from domain where status=0 and errorCount<3 order by errorCount asc limit 300";
+	private static String processSQL = "select domain,status,errorCount,createTime,batch from domain where status=0 and errorCount<3 order by errorCount asc limit 50";
 	
 	private static String updateSUCCESS_SQL = "update domain set status=1,errorMsg=null,updateTime=now() where domain=?";
 	

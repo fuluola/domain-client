@@ -28,24 +28,24 @@ public class UtilTest {
     
     public static void main(String[] args) throws IOException {
 
-    	HtmlHead hh = WebUtil.getHtmlHead("http://www.tpkfoundation.com");
-		System.out.println(hh.getTitle());
+//    	HtmlHead hh = WebUtil.getHtmlHead("http://www.tpkfoundation.com");
+//		System.out.println(hh.getTitle());
 		
-		String html = "<html><head><title>First parse</title></head>"
-				  + "<body><p>Parsed HTML into a doc.</p>";
-		Document doc = Jsoup.parse(html);
-//    	String str="qq--ww900.mld.cn";
+
+    	String str="123456.com.cn";
+//    	str = str.substring(0, str.indexOf("."));
 //    	String regEx = "(\\S+\\.){2}(com|net|org|cn|tw)";
 //    	String regEx2 = "(\\S+)(.com|.net|.org|.cn|.tw){2}"; 
-//    	Pattern pattern = Pattern.compile(regEx2, Pattern.CASE_INSENSITIVE);
+		String domainReg = "[A-Za-z0-9\\-\\.]+";
+    	Pattern pattern = Pattern.compile(domainReg, Pattern.CASE_INSENSITIVE);
 //
-//    	Matcher matcher = pattern.matcher(str);
+    	Matcher matcher = pattern.matcher(str);
 //    	    // 字符串是否与正则表达式相匹配
-//	    boolean rs = matcher.matches();
+	    boolean rs = matcher.matches();
+	    System.out.println(rs);
 //	    String line="Name Server:xxx";
 //	    String[] arr = line.split(":");
 //	    
 //	    System.out.println(0%arr.length);
-	    System.out.println("".length());
 	}
 }

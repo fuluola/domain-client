@@ -11,8 +11,6 @@ import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.lifu.model.Constants;
@@ -26,8 +24,6 @@ public class WhoisService {
 
     private static final int DEFAULT_PORT = 43;  
    // private static Logger logger = LoggerFactory.getLogger(WhoisService.class);
-
-    private static Logger logger = LoggerFactory.getLogger(WhoisService.class);
       //grs-whois.hichina.com whois.paycenter.com.cn whois.markmonitor.com whois.verisign-grs.com
     public QueryDomainRespMessage query(String domain)  {  
     	
@@ -43,7 +39,7 @@ public class WhoisService {
         String tld = getTLD(domain);  
         if ("com".equals(tld)) {  
         	server = "whois.verisign-grs.com";
-        	return queryComWhoisServer(domain, server);  
+        	return querySimpleComWhoisServer(domain, server);  
         } else if ("net".equals(tld)) {  
             server = "whois.networksolutions.com";  
             return queryNetWhoisServer(domain, server);  
@@ -350,7 +346,48 @@ public class WhoisService {
 		}
         return respMsg;  
     }  
-    
+    public QueryDomainRespMessage querySimpleComWhoisServer(String domain, String server) {  
+        Socket socket = new Socket();  
+        SocketAddress  remoteAddr=new InetSocketAddress(server, DEFAULT_PORT);
+        PrintWriter out = null;
+        String lineSeparator = "\r\n",line="";  
+        StringBuilder ret = new StringBuilder();  
+        DomainObject obj = new DomainObject();
+        QueryDomainRespMessage respMsg = new QueryDomainRespMessage();
+    	obj.setDomainName(domain);
+        try {
+			socket.connect(remoteAddr, 15*1000);
+			socket.setSoTimeout(20 * 1000);  
+        	out = new PrintWriter(socket.getOutputStream());  
+        	out.println(domain);  
+        	out.flush(); 
+        	BufferedReader in2 = new BufferedReader(new InputStreamReader(socket.getInputStream()));  
+        	while((line=in2.readLine())!=null){
+        		if(line.contains("No match for")){
+        			respMsg.setCode(Constants.FAIL);
+                	respMsg.setExceptionMsg(line);
+        			return respMsg;
+        		}
+        		ret.append(line + lineSeparator);  
+        		ParseResultDomainInfo.parseSimpleComDomainInfo(obj, line.trim());
+        	}
+        	respMsg.setCode(Constants.SUCCESS);
+        	respMsg.setDomainObject(obj);
+        	respMsg.setSuccResultStr(ret.toString());
+		} catch (IOException e) {
+			respMsg.setCode(Constants.FAIL);
+			respMsg.setExceptionMsg(e.getMessage());
+			e.printStackTrace();
+		}finally{
+		   	out.close();
+        	try {
+				socket.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+        return respMsg;  
+    }  
     public String queryWhoisServer(String domain,String server) throws UnknownHostException, IOException {
     	String lineSeparator = "\r\n";  
     	Socket socket = new Socket(server, DEFAULT_PORT);  
@@ -377,11 +414,9 @@ public class WhoisService {
       
     public static void main(String[] args) throws Exception {  
     	WhoisService w = new WhoisService();  
-      //  System.out.println(w.query("spring.io")); maxitelecom.com.tw
-        long start=System.currentTimeMillis();
-        //QueryDomainRespMessage  grs-whois.hichina.com
-//        String msg = w.queryWhoisServer("tpkfoundation.com", "whois.verisign-grs.com");
-        QueryDomainRespMessage msg = w.query("tpkfoundation.com");
+        //QueryDomainRespMessage  grs-whois.hichina.com whois.verisign-grs.com
+//        String msg = w.queryWhoisServer("bejson.com", "grs-whois.hichina.com");
+        QueryDomainRespMessage msg = w.query("0800000007.com");
         System.out.println(msg);
     }  
       

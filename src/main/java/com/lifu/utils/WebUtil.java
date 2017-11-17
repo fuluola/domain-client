@@ -72,7 +72,6 @@ public class WebUtil {
 		}
 		//<meta http-equiv="Content-Type" content="text/html; charset=gb2312" />
     	String body = response.body();
-    	System.out.println(body);
     	Document document = null;
     	try {
     		 document = Jsoup.parse(body);

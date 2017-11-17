@@ -14,7 +14,32 @@ import com.mysql.jdbc.StringUtils;
 
 public class ParseResultDomainInfo {
 
-	//
+public static DomainObject parseSimpleComDomainInfo(DomainObject obj,String line){
+		
+		if(line.startsWith("Creation Date:")){
+			if(!StringUtils.isNullOrEmpty(line.split(":")[1]))
+				obj.setCreationDate(line.split(":")[1].trim().substring(0, 10));
+		}else if(line.startsWith("Registry Expiry Date:")){
+			if(!StringUtils.isNullOrEmpty(line.split(":")[1]))
+				obj.setExpirationDate(line.split(":")[1].trim().substring(0, 10));
+		}else if(line.startsWith("Registrar:")){
+			obj.setRegistrar(line.split(":")[1].trim());
+		}else if(line.startsWith("Registrar Abuse Contact Phone:")){
+			if(line.split(":").length>1)
+				obj.setRegistrantPhone(line.split(":")[1]);
+		}else if(line.startsWith("Registrar Abuse Contact Email:")){
+			if(line.split(":").length>1)
+				obj.setRegistrantEmail(line.split(":")[1].trim());
+		}else if(line.startsWith("Name Server") && StringUtils.isNullOrEmpty(obj.getNsServer())){
+			if(line.split(":").length>1)
+				obj.setNsServer(line.split(":")[1]);
+		}else if(line.startsWith("Name Server") && !StringUtils.isNullOrEmpty(obj.getNsServer()) && StringUtils.isNullOrEmpty(obj.getDnsServer())){
+			if(line.split(":").length>1)
+				obj.setDnsServer(line.split(":")[1]);
+		}
+		return obj;
+	}
+
 	public static DomainObject parseComDomainInfo(DomainObject obj,String line){
 		
 		if(line.startsWith("Creation Date:")){
