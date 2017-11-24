@@ -29,6 +29,7 @@ import com.lifu.model.QueryDomainRespMessage;
 @Repository
 public class DomainRepository {
 	
+	
 	private JdbcTemplate jdbc;
 	
 	public DomainRepository(JdbcTemplate jdbc){
@@ -46,6 +47,8 @@ public class DomainRepository {
 	
 	private static String updateERROR_SQL = "update domain set errorMsg=?,errorCount=errorCount+1,updateTime=now() where domain=?";
 	
+	private static String EXIST_DOMAIN = "SELECT COUNT(*) FROM domaininfo_collect WHERE domainName=?";
+	
 	private static String insertDomainInfoSQL= "INSERT INTO domaininfo_collect (domainName,registrantOrganization,registrar,registrantName,"
 			+ "registrantPhone,registrantEmail,nsServer,dnsServer,creationDate,expirationDate,ip,ipAddress,"
 			+ "title,keywords,description,googlePR,createTime,batch) values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,now(),?)";
@@ -60,6 +63,11 @@ public class DomainRepository {
 		
 	}
 	
+	public boolean existDomain(String domain){
+		Integer count = jdbc.queryForObject(EXIST_DOMAIN, new Object[]{domain}, Integer.class);
+		return count==1;
+	}
+	
 	public int insertDomain(String data,String batch) {
 		
 		if(findByDomain(data)==null){
@@ -70,13 +78,20 @@ public class DomainRepository {
 	}
 	
 	public List<Map<String,Object>> queryProcessDomain(){
-
-		return jdbc.queryForList(processSQL);
+		List<Map<String,Object>>  list =jdbc.queryForList(processSQL);
+		if(list.size()==0){
+			return null;
+		}
+		return list;
 		  
 	}
 	
 	@Transactional
 	public void processSingleDomain(String data,String batch){
+		if(this.existDomain(data)){
+			logger.info("[ "+data+" ] domain info is exist!!" );
+			return;
+		}
 		QueryDomainRespMessage respMsg=infoService.domainInfoQuery(data);
 		if(respMsg==null) {
 			jdbc.update(updateERROR_SQL, new Object[]{"该域名没有找到注册信息",data});

@@ -46,7 +46,7 @@ public class ContactController {
 		int totalRow = 0;
 		String resultStr = "",line;
         String fileName=file.getOriginalFilename();
-        logger.info("导入文件名:"+fileName);
+        logger.info("import filename:"+fileName);
         String suffix = fileName.substring(fileName.lastIndexOf(".")+1);
         if(!"txt".equals(suffix)){
         	resultStr="请导入文本格式文件";
@@ -62,7 +62,7 @@ public class ContactController {
             		int succRow = domainRepo.insertDomain(line,batch);
             		totalRow+=succRow;
             		if(succRow==1){
-            			logger.info(line+" insert into database SUCCESS!");
+            			logger.info("[ "+line+" ] insert into database SUCCESS!");
             		}
             	}else{
             		logger.info(line+" format is illegal");
