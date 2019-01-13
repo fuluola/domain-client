@@ -7,10 +7,16 @@ import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+
+import javax.net.ssl.HttpsURLConnection;
 
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
@@ -152,4 +158,39 @@ public class WebUtil {
 	public static String post(String url, String data) throws Exception {
 		 return post(url, data, CONTENT_TYPE_FORM);
 	}
+	
+public static Element getHtmlContent(String path,String id) throws KeyManagementException, NoSuchAlgorithmException  {
+		
+		if(!path.contains("http://") && !path.contains("https://")){
+			if(!path.contains("www.")){
+				path = "www."+path.trim();
+			}
+			path = "http://"+path;
+		}
+		HttpsHelper2.trustAllHttpsCertificates();
+		HttpsURLConnection.setDefaultHostnameVerifier(new HttpsHelper2().hv);  
+    	Connection.Response response=null;
+		try {
+			//document = Jsoup.parse(new URL(path).openStream(),"utf-8",path);
+			response = Jsoup.connect(path).timeout(15*1000).execute();
+		} catch (IOException e) {
+			e.printStackTrace();
+			return null;
+		}
+    	String body = response.body();
+    	Document document = null;
+    	try {
+    		 document = Jsoup.parse(body);
+		} catch (IllegalArgumentException e) {
+			logger.info("can not parse this website!!!");
+			return null;
+		}
+    	//725299 table-pk10
+//    	Elements element = document.getElementsByClass("table h45 history-table");
+    	Element element = document.getElementById(id);
+//    	element.outerHtml();
+		return element;
+	}
+
+
 }
